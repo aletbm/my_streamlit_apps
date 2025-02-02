@@ -1,7 +1,4 @@
 import os
-import sys
-sys.path.append(os.path.dirname("/mount/src/my_streamlit_apps/disaster_tweet_prediction/scripts/utils.py"))
-
 import streamlit as st
 import tensorflow as tf
 from tensorflow.keras.preprocessing.text import Tokenizer
