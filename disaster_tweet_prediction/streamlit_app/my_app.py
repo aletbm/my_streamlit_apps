@@ -36,9 +36,9 @@ with open(path+'/models/tokenizer.bin', 'rb') as f_in:
     tokenizer, dict_words = cloudpickle.load(f_in)
     
 def word_cloud(text, stopwords):
-    word_cloud = WordCloud(width=1280, height=360, stopwords=stopwords, max_words=300).generate(text=alltext.lower())
+    word_cloud = WordCloud(width=920, height=240, stopwords=stopwords, max_words=300).generate(text=alltext.lower())
 
-    fig, ax = plt.subplots(1, 1, figsize=(10, 20), dpi=200)
+    fig, ax = plt.subplots(1, 1, figsize=(10, 20), dpi=100)
     ax.imshow(word_cloud)
     ax.axis("off")
     plt.tight_layout()
@@ -57,7 +57,7 @@ def plot_top_words(data, bag_of_words, top=20):
     
     top_word_notdisaster = bag_of_words[data["target"] == 0].sum().sort_values(ascending=False)
     top_word_notdisaster = top_word_notdisaster[:top]
-    fig, ax = plt.subplots(1, 2, figsize=(18, 10), dpi=200)
+    fig, ax = plt.subplots(1, 2, figsize=(12, 6), dpi=100)
     
     sns.barplot(y=top_word_notdisaster.index, x=top_word_notdisaster, color='#08F7FE', ax=ax[0])
     ax[0].set_title("Non-Disaster Tweets")
@@ -232,7 +232,7 @@ The processing pipeline consists of one or more pipeline components that are cal
     st.write("### Distribution of the context feature by tweet type")
     
     target = df_clean["target"].map({0: "Not Disaster Tweets", 1: "Disaster Tweets"})
-    fig, ax = plt.subplots(3, 2, figsize=(20, 15), dpi=300)
+    fig, ax = plt.subplots(3, 2, figsize=(12, 10), dpi=100)
     for i, col in enumerate(["n_words", "n_characters", "n_hashtags", "n_mentions", "n_urls", "n_punctuations"]):
         plt.subplot(3, 2, i+1)
         sns.histplot(x=df_clean[col], hue=target, hue_order=["Not Disaster Tweets", "Disaster Tweets"], alpha=0.35, kde=True)
