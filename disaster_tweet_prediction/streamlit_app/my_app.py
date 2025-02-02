@@ -15,6 +15,9 @@ import cloudpickle
 import spacy
 plt.style.use("cyberpunk")
 
+path = "/mount/src/my_streamlit_apps/disaster_tweet_prediction/"
+#path="."
+
 aux = STOPWORDS.copy()
 aux.update(["t"])
 aux.update(["co"])
@@ -29,13 +32,13 @@ aux.update(["ûò"])
 nlp = spacy.load("en_core_web_lg")
 matcher, _, max_length_tweet, max_length_keyword = init_configure(nlp)
 
-with open('/mount/src/my_streamlit_apps/disaster_tweet_prediction/models/tokenizer.bin', 'rb') as f_in:
+with open(path+'/models/tokenizer.bin', 'rb') as f_in:
     tokenizer, dict_words = cloudpickle.load(f_in)
     
 def word_cloud(text, stopwords):
     word_cloud = WordCloud(width=1280, height=360, stopwords=stopwords, max_words=300).generate(text=alltext.lower())
 
-    fig, ax = plt.subplots(1, 1, figsize=(10, 20), dpi=2000)
+    fig, ax = plt.subplots(1, 1, figsize=(10, 20), dpi=200)
     ax.imshow(word_cloud)
     ax.axis("off")
     plt.tight_layout()
@@ -139,8 +142,8 @@ with tab1:
     """)
 
 with tab2:
-    df = pd.read_csv("/mount/src/my_streamlit_apps/disaster_tweet_prediction/dataset/nlp-getting-started/train.csv", index_col="id")
-    df_clean = pd.read_csv("/mount/src/my_streamlit_apps/disaster_tweet_prediction/streamlit_app/train_clean.csv", index_col="id")
+    df = pd.read_csv(path+"/dataset/nlp-getting-started/train.csv", index_col="id")
+    df_clean = pd.read_csv(path+"/streamlit_app/train_clean.csv", index_col="id")
 
     st.write(f"""## Dataset Description
 The dataset for training contains {len(df)} records about tweets.
@@ -247,7 +250,7 @@ The processing pipeline consists of one or more pipeline components that are cal
 with tab3:
     st.warning("Attention: The model may not always make accurate predictions. I am currently working to improve it. This application is for educational purposes only.", icon="📢")
     #model = tf.keras.models.load_model("./models/model_base.h5")
-    model = tf.keras.models.load_model("/mount/src/my_streamlit_apps/disaster_tweet_prediction/models/model_base.h5")
+    model = tf.keras.models.load_model(path+"/models/model_base.h5")
     st.write("## Load your data")
     st.write("### Complete the following information")
     
@@ -279,7 +282,7 @@ with tab3:
     
     st.write("### Or, you can upload your CSV file")
     st.write("#### Example")
-    df_test = pd.read_csv("/mount/src/my_streamlit_apps/disaster_tweet_prediction/dataset/nlp-getting-started/test.csv", index_col="id")
+    df_test = pd.read_csv(path+"/dataset/nlp-getting-started/test.csv", index_col="id")
     df_test = df_test.drop(df_test[df_test["keyword"].isna()].index).head()
     st.dataframe(df_test[["keyword", "text"]])
     st.write("""Your file must contain the following fields: `id`, `keyword` and `text`.""")
@@ -303,4 +306,4 @@ with tab3:
             st.error('Please, load your file.', icon="🚨")
             
         
-#streamlit run ./app/my_app.py
+#streamlit run ./streamlit_app/my_app.py
