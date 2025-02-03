@@ -9,12 +9,6 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from PIL import Image
 import cv2
-import sys
-import path
-
-dir = path.Path(__file__).abspath()
-sys.path.append(dir.parent.parent+"/models/model_seg_clf.keras")
-print(dir.parent.parent+"/models/model_seg_clf.keras")
 
 def download_image(url):
     with req.urlopen(url) as resp:
@@ -43,7 +37,7 @@ st.write("""
 # 🩸 Blood Cell Cancer Prediction - Classification & Segmentation
 """)
 
-model = tf.keras.models.load_model("/mount/src/my_streamlit_apps/blood_cell_cancer_prediction/models/model_seg_clf.keras")
+model = tf.keras.models.load_model("model_seg_clf.keras")
 
 st.write("You have two options to load your image:")
 st.write("#### First option")
