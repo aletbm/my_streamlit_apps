@@ -14,6 +14,9 @@ import path
 
 dir = path.Path(__file__).abspath()
 sys.path.append(dir.parent.parent)
+print(dir.parent.parent)
+print(dir.parent)
+print(dir)
 
 def download_image(url):
     with req.urlopen(url) as resp:
