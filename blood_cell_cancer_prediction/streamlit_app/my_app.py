@@ -13,7 +13,7 @@ import sys
 import path
 
 dir = path.Path(__file__).abspath()
-sys.append.path(dir.parent.parent)
+sys.path.append(dir.parent.parent)
 
 def download_image(url):
     with req.urlopen(url) as resp:
