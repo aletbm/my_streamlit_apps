@@ -9,6 +9,9 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from PIL import Image
 import cv2
+import wget
+
+wget.download("https://github.com/aletbm/my_streamlit_apps/raw/refs/heads/main/blood_cell_cancer_prediction/models/model_seg_clf.keras")
 
 def download_image(url):
     with req.urlopen(url) as resp:
