@@ -13,10 +13,8 @@ import sys
 import path
 
 dir = path.Path(__file__).abspath()
-sys.path.append(dir.parent.parent)
-print(dir.parent.parent)
-print(dir.parent)
-print("Hellooooo")
+sys.path.append(dir.parent.parent+"/models/model_seg_clf.keras")
+print(ddir.parent.parent+"/models/model_seg_clf.keras")
 
 def download_image(url):
     with req.urlopen(url) as resp:
