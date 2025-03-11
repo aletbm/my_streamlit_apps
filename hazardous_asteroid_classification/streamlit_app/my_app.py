@@ -233,7 +233,7 @@ objects' orbits.
                 'tp': np.nan,
                 'per': np.nan,
                 'moid': [moid],
-                'class': class_option,
+                'class': str(class_option).split(" ")[0],
                 'rms': np.nan
                 })
             
