@@ -3,7 +3,7 @@ import cloudpickle
 import pandas as pd
 import numpy as np
 
-path = "/mount/src/Hazardous_Asteroid_Classification/"
+path = "/mount/src/my_streamlit_apps/hazardous_asteroid_classification/"
 #path="./"
 
 with open(path+'model/HAP_model.bin', 'rb') as f_in:
