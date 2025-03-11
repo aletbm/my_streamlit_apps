@@ -84,7 +84,7 @@ with tab1:
     
     ### My resource about this competition
     I would like to share you my resource about this topic:
-    + My blog on Notion: [Natural Language Processing using spaCy, TensorFlow and BERT model architecture](https://volcano-camp-325.notion.site/Natural-Language-Processing-using-spaCy-TensorFlow-and-BERT-model-architecture-1895067176b380d09484d4b0338b0c5e?pvs=4) (Comming soon!)
+    + My blog on Notion: [Natural Language Processing using spaCy, TensorFlow and BERT model architecture](https://volcano-camp-325.notion.site/Natural-Language-Processing-using-spaCy-TensorFlow-and-BERT-model-architecture-1895067176b380d09484d4b0338b0c5e?pvs=4)
     + My GitHub repository: [NLP with Disaster Tweets](https://github.com/aletbm/MySolutions_MLZoomcamp2024_DataTalks.Club/tree/main/NLP_with_Disaster_Tweets_Capstone_2)
     + My code on Kaggle: [🌋 NLP with Disaster Tweets](https://www.kaggle.com/code/aletbm/nlp-with-disaster-tweets/notebook)
     """)
