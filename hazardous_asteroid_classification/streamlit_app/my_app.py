@@ -2,24 +2,145 @@ import streamlit as st
 import cloudpickle
 import pandas as pd
 import numpy as np
+import requests
+import json
+import urllib.parse
+from astropy.time import Time
+from astropy import units as u
+from poliastro.bodies import Earth, Sun
+from poliastro.twobody import Orbit
+from poliastro.plotting.misc import plot_solar_system
+from poliastro.frames import Planes
+from scipy.spatial.transform import Rotation
+
+def url_encode_json(data):
+    json_string = json.dumps(data)
+    encoded_string = urllib.parse.quote(json_string)
+    return encoded_string
+
+def au2km(x):
+    return x*149597870.7
+
+def asteroid_orbit_from_orbital_elements(asteroid, object_center="sun"):
+    ma = asteroid.ma[0]   #mean anomaly
+    e = asteroid.e[0]    #eccentricity
+    a = au2km(asteroid.a[0])     #semi-major axis
+    nu = ma + (2*e - (e**3)/4)*np.sin(ma) + (5/4)*(e**2)*np.sin(2*ma) + (13/12)*(e**3)*np.sin(3*ma)     #true anomaly
+    p = a*(1-e**2)  #semi-latus rectum
+    if object_center == "sun":
+        obc = Sun
+        mu = 1.32712E11 #standard gravitational parameter of the Sun
+    elif object_center == "earth":
+        obc = Earth
+        mu = 3.98600E5 #standard gravitational parameter of the Earth
+    omega = asteroid.w[0]
+    i = asteroid.i[0]
+    epoch = Time([asteroid.epoch[0]], format='jd')
+
+    # According to https://downloads.rene-schwarz.com/download/M001-Keplerian_Orbit_Elements_to_Cartesian_State_Vectors.pdf
+
+    # Transform to perifocal frame
+    r_w = (p / (1 + e * np.cos(nu))) * np.array((np.cos(nu), np.sin(nu), 0))
+    
+    v_w = ((mu/p)**(1/2)) * np.array((-np.sin(nu), e + np.cos(nu), 0))
+
+    # Rotate the perifocal frame
+    R = Rotation.from_euler("ZXZ", [-omega, -i, -omega])
+    r_rot = r_w @ R.as_matrix()
+    v_rot = v_w @ R.as_matrix()
+
+    # Change units
+    r = r_rot * u.km
+    v = v_rot * u.km / u.s
+
+    return r, v, epoch, asteroid.full_name[0], Orbit.from_vectors(obc, r, v, epoch, plane=Planes.EARTH_ECLIPTIC)
+
+st.set_page_config(layout="wide")
 
 path = "/mount/src/my_streamlit_apps/hazardous_asteroid_classification/"
 #path="./"
-
+    
 with open(path+'model/HAP_model.bin', 'rb') as f_in:
     pipe, le, sfs, rf = cloudpickle.load(f_in)
-
-st.set_page_config(layout="wide")
 
 st.image("https://i.postimg.cc/QMv4swP3/123.png")    
 st.write("""# ☄️ Hazardous Asteroid Classifier by [Alexander D. Rios](https://linktr.ee/aletbm)""")
 
+df = pd.read_parquet(path+"app/full_name.gzip").rename(columns={"full_name":"Asteroid name"})
+response = None
+class_orbit = ["AMO - Amor",
+                "APO - Apollo",
+                "AST - Asteroid",
+                "ATE - Aten",
+                "CEN - Centaur",
+                "HYA - Hyperbolic Asteroid",
+                "IEO - Interior Earth Object",
+                "IMB - Inner Main-belt Asteroid",
+                "MBA - Main-belt Asteroid",
+                "MCA - Mars-crossing Asteroid",
+                "OMB - Outer Main-belt Asteroid",
+                "PAA - Parabolic Asteroid",
+                "TJN - Jupiter Trojan",
+                "TNO - TransNeptunian Object"]
+
+H = i = om = w = ma = n = moid = 0.0
+class_option = 0
+    
+col1, col2 = st.columns([0.3, 0.7], border=True)
+with col1:
+    st.write("#### List of asteroids")
+    st_df = st.dataframe(df, on_select ="rerun", selection_mode="single-row", height=550)
+with col2:
+    st.write("#### Selected asteroid")
+    if len(st_df["selection"]["rows"]):
+        aux = df.iloc[st_df["selection"]["rows"][0]].values[0].split("(")[0]
+        asteroid = aux if aux.replace(" ", "") != "" else df.iloc[st_df["selection"]["rows"][0]].values[0].split("(")[1].replace(")", "")
+        url = f'https://ssd-api.jpl.nasa.gov/sbdb.api?sstr={asteroid}&phys-par=1'
+        response = requests.get(url).json()
+    
+        H = float(response["phys_par"][0]["value"]) if response is not None and len(response["phys_par"]) else 0.0
+        i = float(response["orbit"]["elements"][3]["value"]) if response is not None and len(response["orbit"]["elements"]) else 0.0
+        om = float(response["orbit"]["elements"][4]["value"]) if response is not None and len(response["orbit"]["elements"]) else 0.0
+        w = float(response["orbit"]["elements"][5]["value"]) if response is not None and len(response["orbit"]["elements"]) else 0.0
+        ma = float(response["orbit"]["elements"][6]["value"]) if response is not None and len(response["orbit"]["elements"]) else 0.0
+        n = float(response["orbit"]["elements"][9]["value"]) if response is not None and len(response["orbit"]["elements"]) else 0.0
+        moid = float(response["orbit"]["moid"]) if response is not None and response["orbit"]["moid"] else 0.0
+        class_option = class_orbit.index(response["object"]["orbit_class"]["code"] + " - " + response["object"]["orbit_class"]["name"]) if response is not None else 0
+        e = float(response["orbit"]["elements"][0]["value"]) if response is not None and len(response["orbit"]["elements"]) else 0.0
+        a = float(response["orbit"]["elements"][1]["value"]) if response is not None and len(response["orbit"]["elements"]) else 0.0
+        epoch = float(response["orbit"]["epoch"]) if response is not None and response["orbit"]["epoch"] else 0.0
+        asteroid = pd.DataFrame({
+                    'full_name':asteroid,
+                    'H': [H], 
+                    'i': [i],
+                    'om': [om],
+                    'w': [w],
+                    'ma': [ma],
+                    'n': [n],
+                    'moid': [moid],
+                    'e': [e],
+                    'a': [a],
+                    'epoch': [epoch],
+                    'class': class_orbit[class_option] if response is not None else "",
+                    })
+        
+        EPOCH = Time("2000-01-01 12:00:00", scale="tdb")
+        frame = plot_solar_system(outer=False, epoch=EPOCH, interactive=True, use_3d=True)
+        _, _, epoch, ast_name, orb = asteroid_orbit_from_orbital_elements(asteroid, object_center="sun")
+        frame._figure.update_layout(autosize=False, legend=dict(orientation="h", font=dict(size=8)), width=800, height=400, margin=dict(l=20, r=20, b=20, t=20, pad=0), template="plotly_dark")
+        frame.plot(orb, label=ast_name, color="white")
+        st.plotly_chart(frame.show(), use_container_width=True)
+        
+        st.write("#### Parameters of the asteroid")
+        ast_df = st.dataframe(asteroid)
+    
 with st.form("my_form"):
     st.write("#### Load your asteroid data")
 
     col1, col2 = st.columns(2)
     with col1:
         H = st.number_input("Absolute magnitude",
+                            value=H,
                             format="%0.15f",
                             min_value=0.0,
                             help="""# Absolute magnitude
@@ -66,6 +187,7 @@ angle in its normal meaning in optics or electronics.)
 
         i = st.number_input("Inclination (Angle relative to the x-y ecliptic plane) [Degrees]", 
                             format="%0.15f",
+                            value=i,
                             max_value=360.0,
                             min_value=0.0,
                             help="""# Inclination
@@ -85,6 +207,7 @@ plane that the Earth's orbit defines.
 
         om = st.number_input("Longitude of the ascending node [Degrees]",
                             format="%0.15f",
+                            value=om,
                             max_value=360.0,
                             min_value=0.0,
                             help="""# Longitude of the ascending node
@@ -100,6 +223,7 @@ a reference plane, as shown in the adjacent image:
     with col2:
         w = st.number_input("Argument of perihelion [Degrees]",
                             format="%0.15f",
+                            value=w,
                             max_value=360.0,
                             min_value=0.0,
                             help="""# Argument of perihelion
@@ -117,6 +241,7 @@ orbit, is the perihelion.
 
         ma = st.number_input("Mean anomaly [Degrees]",
                             format="%0.15f",
+                            value=ma,
                             max_value=360.0,
                             min_value=0.0,
                             help="""# Mean anomaly
@@ -135,6 +260,7 @@ orbital period as the actual body in its elliptical orbit.
 
         n = st.number_input("Mean motion [Degrees/Days]",
                             format="%0.15f",
+                            value=n,
                             min_value=0.0,
                             help="""# Mean motion
 In orbital mechanics, mean motion (represented by n) is the 
@@ -149,6 +275,7 @@ of the actual body.
 
         moid = st.number_input("Minimum orbit intersection distance with Earth [AU]",
                                 format="%0.15f",
+                                value=moid,
                                 min_value=0.0,
                                 help="""# Minimum orbit intersection distance with Earth (MOID)
 The MOID is the distance between the closest points of two 
@@ -160,7 +287,7 @@ objects' orbits.
 
         class_option = st.selectbox(
             "Orbit classification",
-            ("AMO - Amor",
+            ["AMO - Amor",
             "APO - Apollo",
             "AST - Asteroid",
             "ATE - Aten",
@@ -173,7 +300,8 @@ objects' orbits.
             "OMB - Outer Main-belt Asteroid",
             "PAA - Parabolic Asteroid",
             "TJN - Jupiter Trojan",
-            "TNO - TransNeptunian Object"),
+            "TNO - TransNeptunian Object"],
+            index=class_option,
             help="""| Abbreviation | Title | Description |
 | ------------- | ------ | ----------- |
 |AMO|Amor|Near-Earth asteroid, orbit similar to 1221 Amor (a > 1.0 AU; 1.017 AU < q < 1.3 AU).|
