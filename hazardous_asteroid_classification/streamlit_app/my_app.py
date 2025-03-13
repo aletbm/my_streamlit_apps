@@ -66,7 +66,7 @@ with open(path+'model/HAP_model.bin', 'rb') as f_in:
 st.image("https://i.postimg.cc/QMv4swP3/123.png")    
 st.write("""# ☄️ Hazardous Asteroid Classifier by [Alexander D. Rios](https://linktr.ee/aletbm)""")
 
-df = pd.read_parquet(path+"app/full_name.gzip").rename(columns={"full_name":"Asteroid name"})
+df = pd.read_parquet(path+"streamlit_app/full_name.gzip").rename(columns={"full_name":"Asteroid name"})
 response = None
 class_orbit = ["AMO - Amor",
                 "APO - Apollo",
