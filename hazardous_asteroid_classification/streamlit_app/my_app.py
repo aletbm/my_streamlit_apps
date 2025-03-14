@@ -70,6 +70,7 @@ st.write("## Visualizations with Poliastro")
 df = pd.read_parquet(path+"streamlit_app/full_name.gzip").rename(columns={"full_name":"Asteroid name"})
 
 response = asteroids = None
+full_name = []
 H = []
 i = []
 om = []
@@ -113,7 +114,8 @@ with col2:
             asteroid = aux if aux.replace(" ", "") != "" else df.iloc[st_df["selection"]["rows"][0]].values[0].split("(")[1].replace(")", "")
             url = f'https://ssd-api.jpl.nasa.gov/sbdb.api?sstr={asteroid}&phys-par=1'
             response = requests.get(url).json()
-        
+            
+            full_name.append(asteroid)
             H.append(float(response["phys_par"][0]["value"]))
             i.append(float(response["orbit"]["elements"][3]["value"]))
             om.append(float(response["orbit"]["elements"][4]["value"]))
@@ -126,7 +128,7 @@ with col2:
             a.append(float(response["orbit"]["elements"][1]["value"]))
             epoch.append(float(response["orbit"]["epoch"]))
             asteroids = pd.DataFrame({
-                        'full_name':asteroid,
+                        'full_name':full_name,
                         'H': H, 
                         'i': i,
                         'om': om,
