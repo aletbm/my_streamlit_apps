@@ -67,7 +67,7 @@ st.image("https://i.postimg.cc/QMv4swP3/123.png")
 st.write("""# ☄️ Hazardous Asteroid Classifier by [Alexander D. Rios](https://linktr.ee/aletbm)""")
 
 st.write("## Visualizations with Poliastro")
-df = pd.read_parquet(path+"streamlit_app/full_name.gzip").rename(columns={"full_name":"Asteroid name"})
+df = pd.read_parquet(path+"app/full_name.gzip").rename(columns={"full_name":"Asteroid name"})
 
 response = asteroids = None
 full_name = []
@@ -105,7 +105,7 @@ col1, col2 = st.columns([0.3, 0.7], border=True)
 with col1:
     st.write("#### List of asteroids")
     st.write("Select one or more asteroids from the list to view their orbits.")
-    st_df = st.dataframe(df, on_select="rerun", selection_mode="multi-row", height=550, width=300)
+    st_df = st.dataframe(df, on_select="rerun", selection_mode="multi-row", height=550, width=300, hide_index=True)
 with col2:
     st.write("#### Orbital visualization")
     if len(st_df["selection"]["rows"]):
@@ -116,16 +116,16 @@ with col2:
             response = requests.get(url).json()
             
             full_name.append(asteroid)
-            H.append(float(response["phys_par"][0]["value"]))
-            i.append(float(response["orbit"]["elements"][3]["value"]))
-            om.append(float(response["orbit"]["elements"][4]["value"]))
-            w.append(float(response["orbit"]["elements"][5]["value"]))
-            ma.append(float(response["orbit"]["elements"][6]["value"]))
-            n.append(float(response["orbit"]["elements"][9]["value"]))
-            moid.append(float(response["orbit"]["moid"]))
+            H.append(float(response["phys_par"][0]["value"]) if response is not None and len(response["phys_par"]) else 0.0)
+            i.append(float(response["orbit"]["elements"][3]["value"]) if response is not None and len(response["orbit"]["elements"]) else 0.0)
+            om.append(float(response["orbit"]["elements"][4]["value"]) if response is not None and len(response["orbit"]["elements"]) else 0.0)
+            w.append(float(response["orbit"]["elements"][5]["value"]) if response is not None and len(response["orbit"]["elements"]) else 0.0)
+            ma.append(float(response["orbit"]["elements"][6]["value"]) if response is not None and len(response["orbit"]["elements"]) else 0.0)
+            n.append(float(response["orbit"]["elements"][9]["value"]) if response is not None and len(response["orbit"]["elements"]) else 0.0)
+            moid.append(float(response["orbit"]["moid"]) if response is not None and response["orbit"]["moid"] else 0.0)
             class_option.append(response["object"]["orbit_class"]["code"])#class_orbit.index(response["object"]["orbit_class"]["code"] + " - " + response["object"]["orbit_class"]["name"]))
-            e.append(float(response["orbit"]["elements"][0]["value"]))
-            a.append(float(response["orbit"]["elements"][1]["value"]))
+            e.append(float(response["orbit"]["elements"][0]["value"]) if response is not None and len(response["orbit"]["elements"]) else 0.0)
+            a.append(float(response["orbit"]["elements"][1]["value"]) if response is not None and len(response["orbit"]["elements"]) else 0.0)
             epoch.append(float(response["orbit"]["epoch"]))
             asteroids = pd.DataFrame({
                         'full_name':full_name,
@@ -141,7 +141,7 @@ with col2:
                         'epoch': epoch,
                         'class': class_option,
                         })
-        
+            
         for k in range(len(asteroids)):
             _, _, epoch, ast_name, orb = asteroid_orbit_from_orbital_elements(asteroids.iloc[k], object_center="sun")
             frame.plot(orb, label=ast_name)
@@ -160,7 +160,7 @@ col1, col2 = st.columns([0.3, 0.7], border=True)
 with col1:
     st.write("#### List of asteroids")
     st.write("Select an asteroid from the list to classify it.")
-    st_df = st.dataframe(df, on_select="rerun", selection_mode="single-row", height=450, width=300)
+    st_df = st.dataframe(df, on_select="rerun", selection_mode="single-row", height=450, width=300, hide_index=True)
     if len(st_df["selection"]["rows"]):
         aux = df.iloc[st_df["selection"]["rows"][0]].values[0].split("(")[0]
         asteroid = aux if aux.replace(" ", "") != "" else df.iloc[st_df["selection"]["rows"][0]].values[0].split("(")[1].replace(")", "")
