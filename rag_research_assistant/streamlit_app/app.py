@@ -1,5 +1,4 @@
 import os
-import sys
 import streamlit as st
 from qdrant_client import QdrantClient, models
 from fastembed import TextEmbedding
@@ -55,7 +54,7 @@ def init_bigquery():
     with open(creds_path, "w") as f:
         json.dump(gcp_creds, f)
     os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = creds_path
-    
+
     client = bigquery.Client()
     dataset_id = f"{client.project}.feedback_dt"
 
