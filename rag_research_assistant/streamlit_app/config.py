@@ -28,7 +28,7 @@ QDRANT_URL = (
     if not LOCAL_DEPLOYMENT
     else "http://qdrant:6333"
 )
-QDRANT_API_KEY = st.secrets["QDRANT_API_KEY"] if not LOCAL_DEPLOYMENT else None
+QDRANT_API_KEY = st.secrets["QDRANT_CLOUD_API_KEY"] if not LOCAL_DEPLOYMENT else None
 DISTANCE_METRIC = "cosine"
 COLLECTION = "articles-rag-cos"
 
