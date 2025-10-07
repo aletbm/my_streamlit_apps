@@ -6,20 +6,24 @@ from fastembed import TextEmbedding
 from google import genai
 from google.genai import types
 from dotenv import load_dotenv
-from rich.console import Console
-from rich.markdown import Markdown
 from datetime import datetime
 import pandas as pd
 from google.cloud import bigquery
 from google.api_core.exceptions import NotFound, Conflict
 import config as cfg
-
+import json
 
 # -----------------------------------------------------------
 # INIT
 # -----------------------------------------------------------
 load_dotenv()
-console = Console()
+
+gcp_creds = st.secrets["google_cloud"]
+creds_path = "/tmp/gcp_credentials.json"
+with open(creds_path, "w") as f:
+    json.dump(gcp_creds, f)
+os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = creds_path
+
 
 st.set_page_config(page_title="RAG Explorer", layout="wide")
 
