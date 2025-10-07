@@ -12,8 +12,6 @@ from datetime import datetime
 import pandas as pd
 from google.cloud import bigquery
 from google.api_core.exceptions import NotFound, Conflict
-
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 import config as cfg
 
 
