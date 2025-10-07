@@ -283,3 +283,18 @@ with st.form("feedback_form"):
         upload_csv(client_bg, df, table_ref)
 
         st.markdown(" Thank you for your feedback! ✅")
+
+# -----------------------------------------------------------
+# CONTACT SECTION
+# -----------------------------------------------------------
+st.markdown("---")
+st.subheader("📩 Contact Me")
+
+st.markdown(
+    """
+If you want to get in touch, you can reach me via email or through my Linktree:
+
+- [Linktree](https://linktr.ee/aletbm)
+- Email: [aletbm@example.com](mailto:alexanderdaniel_rios@hotmail.com)
+"""
+)
