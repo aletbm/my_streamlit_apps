@@ -18,12 +18,6 @@ import json
 # -----------------------------------------------------------
 load_dotenv()
 
-gcp_creds = st.secrets["google_cloud"]
-creds_path = "/tmp/gcp_credentials.json"
-with open(creds_path, "w") as f:
-    json.dump(gcp_creds, f)
-os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = creds_path
-
 
 st.set_page_config(page_title="RAG Explorer", layout="wide")
 
@@ -55,6 +49,13 @@ def load_csv(client, table_ref):
 
 @st.cache_resource
 def init_bigquery():
+    gcp_creds = dict(st.secrets["google_cloud"])
+
+    creds_path = "/tmp/gcp_credentials.json"
+    with open(creds_path, "w") as f:
+        json.dump(gcp_creds, f)
+    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = creds_path
+    
     client = bigquery.Client()
     dataset_id = f"{client.project}.feedback_dt"
 
