@@ -292,9 +292,8 @@ st.subheader("📩 Contact Me")
 
 st.markdown(
     """
-If you want to get in touch, you can reach me via email or through my Linktree:
+If you want to get in touch, you can reach me through my Linktree:
 
 - [Linktree](https://linktr.ee/aletbm)
-- Email: [aletbm@example.com](mailto:alexanderdaniel_rios@hotmail.com)
 """
 )
